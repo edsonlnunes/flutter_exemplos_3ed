@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key}) : super(key: key);
+  MyHomePage({Key? key}) : super(key: key);
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -67,10 +67,12 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: Container(
                     height: 50,
                     width: 300,
-                    child: RaisedButton(
+                    child: ElevatedButton(
                       onPressed: isLoading ? null : () {},
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(100),
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(100),
+                        ),
                       ),
                       child: isLoading
                           ? CircularProgressIndicator()
@@ -78,10 +80,9 @@ class _MyHomePageState extends State<MyHomePage> {
                               'Entrar',
                               style: TextStyle(
                                 fontSize: 20,
+                                color: Colors.white,
                               ),
                             ),
-                      color: Colors.cyan,
-                      textColor: Colors.white,
                     ),
                   ),
                 ),
@@ -92,25 +93,40 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: Container(
                     height: 50,
                     width: 300,
-                    child: OutlineButton(
+                    child: OutlinedButton(
                       onPressed: () {
                         setState(() => isLoading = true);
                       },
-                      borderSide: BorderSide(
-                        color: Colors.white,
-                        width: 2,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(100),
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(
+                          color: Colors.white,
+                          width: 2,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(100),
+                        ),
                       ),
                       child: Text(
                         'Entrar',
                         style: TextStyle(
                           fontSize: 20,
+                          color: Colors.white,
                         ),
                       ),
-                      color: Colors.cyan,
-                      textColor: Colors.white,
+                      // color: Colors.cyan,
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+                TextButton(
+                  onPressed: () {},
+                  child: Text(
+                    'Entrar',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
@@ -138,7 +154,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Widget buildInput({@required String label, @required IconData icon}) {
+  Widget buildInput({required String label, required IconData icon}) {
     return Container(
       width: double.infinity,
       height: 60,
@@ -182,7 +198,7 @@ class _MyHomePageState extends State<MyHomePage> {
         height: 300,
         color: Colors.red,
         child: Stack(
-          overflow: Overflow.visible,
+          clipBehavior: Clip.none,
           children: [
             Container(
               width: 150,

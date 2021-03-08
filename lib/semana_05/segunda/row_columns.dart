@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key}) : super(key: key);
+  MyHomePage({Key? key}) : super(key: key);
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -83,11 +83,11 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class CaixaPreta extends StatelessWidget {
-  final double width;
-  final double height;
-  final Color color;
+  final double? width;
+  final double? height;
+  final Color? color;
 
-  const CaixaPreta({Key key, this.width, this.height, this.color})
+  const CaixaPreta({Key? key, this.width, this.height, this.color})
       : super(key: key);
   @override
   Widget build(BuildContext context) {

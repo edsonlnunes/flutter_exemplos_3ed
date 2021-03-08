@@ -22,14 +22,14 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key}) : super(key: key);
+  MyHomePage({Key? key}) : super(key: key);
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  LongPressGestureRecognizer gestureRecognizer;
+  LongPressGestureRecognizer? gestureRecognizer;
 
   @override
   void initState() {
@@ -42,7 +42,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void dispose() {
-    gestureRecognizer.dispose();
+    gestureRecognizer!.dispose();
     super.dispose();
   }
 
