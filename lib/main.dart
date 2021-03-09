@@ -1,7 +1,10 @@
+import 'package:exemplos_flutter/service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:email_validator/email_validator.dart';
+
+import 'home.page.dart';
 
 void main() {
   runApp(MyApp());
@@ -21,6 +24,8 @@ class MyApp extends StatelessWidget {
   }
 }
 
+enum ETipoRetorno { SIM, NAO }
+
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key? key}) : super(key: key);
 
@@ -32,22 +37,73 @@ class _MyHomePageState extends State<MyHomePage> {
   var isLoading = false;
   var showPass = false;
   var scaffoldKey = GlobalKey<ScaffoldState>();
+  var formKey = GlobalKey<FormState>();
 
-  final emailController = TextEditingController();
-  final passController = TextEditingController();
+  // final emailController = TextEditingController();
+  // final passController = TextEditingController();
+  String? email;
+  String? pass;
 
-  void doLogin(_) {
-    if (!EmailValidator.validate(emailController.text)) {
-      showSnackBar('E-mail inválido', _);
+  void doLogin(ctx) {
+    // if (!Form.of(ctx)!.validate()) return;
+    if (!formKey.currentState!.validate()) return;
+
+    formKey.currentState?.save();
+
+    final isLogged = Service().doLogin(email: email!, pass: pass!);
+
+    if (!isLogged) {
+      showFailureLogin();
       return;
     }
 
-    if (passController.text.isEmpty) {
-      showSnackBar('Senha inválida', _);
-      return;
-    }
+    Navigator.of(context)
+        .pushReplacement(MaterialPageRoute(builder: (__) => ListPage()));
+  }
 
-    // proxima call
+  void showFailureLogin() async {
+    // ##### ALERT DIALOG #####
+    // final result = await showDialog<ETipoRetorno>(
+    //   context: context,
+    //   barrierDismissible: false,
+    //   builder: (ctx) {
+    //     return AlertDialog(
+    //       title: Text('Ops, algo deu errado!'),
+    //       content: Text('Usuário  ou senha inválidos, tente novamente'),
+    //       actions: [
+    //         TextButton(
+    //           child: Text('Sim'),
+    //           onPressed: () {
+    //             Navigator.of(context).pop(ETipoRetorno.SIM);
+    //           },
+    //         ),
+    //         TextButton(
+    //           child: Text('Não'),
+    //           onPressed: () {
+    //             Navigator.pop(context, ETipoRetorno.NAO);
+    //             // Navigator.of(context).pop();
+    //           },
+    //         )
+    //       ],
+    //     );
+    //   },
+    // );
+
+    // print(result);
+
+    // ##### SIMPLE MODAL #####
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return SimpleDialog(
+          title: Text('Ops, algo deu errado!'),
+          contentPadding: EdgeInsets.all(20),
+          children: [
+            Text('Usuário ou senha inválidos, Tente novamente'),
+          ],
+        );
+      },
+    );
   }
 
   void showSnackBar(String text, _) {
@@ -63,32 +119,6 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Colors.red,
       ),
     );
-
-    // scaffoldKey.currentState?.showSnackBar(
-    //   SnackBar(
-    //     content: Text(
-    //       text,
-    //       style: TextStyle(
-    //         fontSize: 17,
-    //       ),
-    //     ),
-    //     behavior: SnackBarBehavior.floating,
-    //     backgroundColor: Colors.red,
-    //   ),
-    // );
-
-    // Scaffold.of(context).showSnackBar(
-    //   SnackBar(
-    //     content: Text(
-    //       text,
-    //       style: TextStyle(
-    //         fontSize: 17,
-    //       ),
-    //     ),
-    //     behavior: SnackBarBehavior.floating,
-    //     backgroundColor: Colors.red,
-    //   ),
-    // );
   }
 
   @override
@@ -112,72 +142,71 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           Padding(
             padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      flex: 2,
-                      child: buildInput(
-                        icon: Icons.person,
-                        label: 'E-mail',
-                        controller: emailController,
-                      ),
-                    ),
-                    SizedBox(
-                      width: 20,
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: buildInput(
-                        icon: Icons.person,
-                        label: 'E-mail',
-                        controller: emailController,
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                buildInput(
-                  icon: Icons.lock,
-                  label: 'Password',
-                  controller: passController,
-                  obscureText: true,
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                Align(
-                  child: Container(
-                    height: 50,
-                    width: 300,
-                    child: Builder(builder: (ctx) {
-                      return ElevatedButton(
-                        onPressed: isLoading ? null : () => doLogin(ctx),
-                        style: ElevatedButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(100),
-                          ),
-                          primary: Colors.red,
-                        ),
-                        child: isLoading
-                            ? CircularProgressIndicator()
-                            : Text(
-                                'Entrar',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  color: Colors.white,
-                                ),
-                              ),
-                      );
-                    }),
+            child: Form(
+              key: formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  buildInput(
+                    icon: Icons.person,
+                    label: 'E-mail',
+                    validator: (value) {
+                      if (!EmailValidator.validate(value!)) {
+                        return 'E-mail inválido';
+                      }
+
+                      return null;
+                    },
+                    onSaved: (value) => email = value,
                   ),
-                ),
-              ],
+                  SizedBox(
+                    height: 20,
+                  ),
+                  buildInput(
+                    icon: Icons.lock,
+                    label: 'Password',
+                    obscureText: true,
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return 'Senha inválida';
+                      }
+
+                      return null;
+                    },
+                    onSaved: (value) => pass = value,
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Align(
+                    child: Container(
+                      height: 50,
+                      width: 300,
+                      child: Builder(builder: (ctx) {
+                        return ElevatedButton(
+                          onPressed: isLoading ? null : () => doLogin(ctx),
+                          style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(100),
+                            ),
+                            primary: Colors.red,
+                          ),
+                          child: isLoading
+                              ? CircularProgressIndicator()
+                              : Text(
+                                  'Entrar',
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                        );
+                      }),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -188,12 +217,16 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget buildInput({
     required String label,
     required IconData icon,
-    required TextEditingController controller,
+    required String? Function(String?) validator,
+    required void Function(String?) onSaved,
+    TextEditingController? controller,
     bool obscureText = false,
   }) {
-    return TextField(
+    return TextFormField(
       controller: controller,
       obscureText: obscureText && !showPass,
+      validator: validator,
+      onSaved: onSaved,
       decoration: InputDecoration(
         labelText: label,
         labelStyle: TextStyle(
@@ -211,17 +244,9 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           borderRadius: BorderRadius.circular(50),
         ),
-        // fillColor: Colors.black,
-        // filled: true,
         counterStyle: TextStyle(
           color: Colors.white,
         ),
-        // icon: Icon(
-        //   Icons.person,
-        // ),
-        // prefixIcon: Icon(
-        //   Icons.person,
-        // ),
         suffixIcon: obscureText
             ? IconButton(
                 icon: Icon(
@@ -236,91 +261,13 @@ class _MyHomePageState extends State<MyHomePage> {
               )
             : null,
       ),
-      // maxLength: 10,
       style: TextStyle(
         color: Colors.white,
       ),
       cursorColor: Colors.white,
       cursorWidth: 4,
       cursorRadius: Radius.circular(10),
-      keyboardType: TextInputType.number,
-      // buildCounter: (
-      //   _, {
-      //   required int currentLength,
-      //   required int? maxLength,
-      //   required bool isFocused,
-      // }) {
-      //   if (isFocused) {
-      //     return Row(
-      //       mainAxisSize: MainAxisSize.min,
-      //       mainAxisAlignment: MainAxisAlignment.end,
-      //       children: [
-      //         Text(
-      //           '$currentLength/$maxLength',
-      //           style: TextStyle(
-      //             color: Colors.white,
-      //           ),
-      //         ),
-      //         SizedBox(
-      //           width: 5,
-      //         ),
-      //         Icon(
-      //           Icons.smoking_rooms,
-      //           color: Colors.white,
-      //         )
-      //       ],
-      //     );
-      //   }
-      //   return null;
-      // },
-      inputFormatters: [
-        // TextInputFormatter.withFunction((oldValue, newValue) => null)
-        // FilteringTextInputFormatter.deny(RegExp('[4-6]')),
-        // TextInputFormatter.withFunction(
-        //   (oldValue, newValue) => TextEditingValue(
-        //     text: newValue.text.toUpperCase(),
-        //     composing: newValue.composing,
-        //     selection: newValue.selection,
-        //   ),
-        // ),
-        // CnpjCpfFormatter(
-        //   eDocumentType: EDocumentType.BOTH,
-        // )
-      ],
+      keyboardType: TextInputType.text,
     );
-    //   return Container(
-    //     width: double.infinity,
-    //     height: 60,
-    //     padding: const EdgeInsets.symmetric(horizontal: 10),
-    //     decoration: BoxDecoration(
-    //       color: Colors.white,
-    //       borderRadius: BorderRadius.circular(50),
-    //       boxShadow: [
-    //         BoxShadow(
-    //           color: Colors.black,
-    //           blurRadius: 5,
-    //           spreadRadius: 2,
-    //         ),
-    //       ],
-    //     ),
-    //     child: Row(
-    //       children: [
-    //         Icon(
-    //           icon,
-    //           color: Colors.black,
-    //           size: 35,
-    //         ),
-    //         SizedBox(
-    //           width: 15,
-    //         ),
-    //         Text(
-    //           label,
-    //           style: TextStyle(
-    //             fontSize: 20,
-    //           ),
-    //         ),
-    //       ],
-    //     ),
-    //   );
   }
 }
