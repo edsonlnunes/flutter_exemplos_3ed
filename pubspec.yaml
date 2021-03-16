@@ -31,6 +31,7 @@ dependencies:
   font_awesome_flutter: ^9.0.0-nullsafety
   cnpj_cpf_formatter: ^1.0.8
   email_validator: ^2.0.0-nullsafety
+  dio: ^3.0.10
 
 dev_dependencies:
   flutter_test:

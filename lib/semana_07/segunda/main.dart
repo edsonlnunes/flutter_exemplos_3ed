@@ -1,12 +1,13 @@
+import 'package:exemplos_flutter/semana_07/segunda/views/detail.page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:email_validator/email_validator.dart';
 
 import 'service.dart';
-import 'list.page.dart';
+import 'views/list.page.dart';
 
-class MyAppQuarta06 extends StatelessWidget {
+class MyAppSegunda07 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -15,28 +16,17 @@ class MyAppQuarta06 extends StatelessWidget {
         primarySwatch: Colors.teal,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      // home: MyHomePage(),
+      // home: LoginPage(),
       initialRoute: '/',
       routes: {
         '/': (_) => LoginPage(),
         '/list-page': (_) => ListPage(),
-      },
-      onGenerateRoute: (settings) {
-        print('generate route');
-        print(settings);
+        '/detail-page': (ctx) {
+          final user =
+              ModalRoute.of(ctx)?.settings.arguments as Map<String, String>?;
 
-        if (settings.name!.startsWith('/products')) {
-          var id = settings.name!.split('/').last;
-          print(id);
-        }
-
-        // return MaterialPageRoute(builder: (_) => LoginPage());
-      },
-      onUnknownRoute: (settings) {
-        print('unknown route');
-        print(settings);
-
-        return MaterialPageRoute(builder: (_) => LoginPage());
+          return DetailPage(user: user);
+        },
       },
     );
   }
@@ -75,7 +65,7 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
-    Navigator.of(context).pushNamed('/list-page');
+    Navigator.of(context).pushReplacementNamed('/list-page');
   }
 
   void showFailureLogin() async {
