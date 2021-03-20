@@ -1,7 +1,8 @@
-import 'package:exemplos_flutter/semana_07/segunda/main.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import 'crud/app.main.dart';
+
 void main() {
-  runApp(MyAppSegunda07());
+  runApp(AppMainCrud());
 }
