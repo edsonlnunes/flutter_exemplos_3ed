@@ -18,8 +18,8 @@ class _LoginViewState extends State<LoginView> with TickerProviderStateMixin {
   var formKey = GlobalKey<FormState>();
   late AnimationController animButtonControler;
 
-  late Animation<double> widthButton;
-  late Animation<double> opacityAnim;
+  late Animation<double> buttonWidthAnim;
+  late Animation<double> buttonOpacityAnim;
   late Animation<Color?> colorAnim;
 
   final _controller = LoginController();
@@ -42,7 +42,7 @@ class _LoginViewState extends State<LoginView> with TickerProviderStateMixin {
       duration: Duration(milliseconds: 400),
     );
 
-    widthButton = Tween<double>(
+    buttonWidthAnim = Tween<double>(
       begin: 400,
       end: 50.0,
     ).animate(
@@ -52,7 +52,7 @@ class _LoginViewState extends State<LoginView> with TickerProviderStateMixin {
       ),
     );
 
-    opacityAnim = Tween<double>(
+    buttonOpacityAnim = Tween<double>(
       begin: 0,
       end: 1,
     ).animate(
@@ -182,21 +182,13 @@ class _LoginViewState extends State<LoginView> with TickerProviderStateMixin {
   }
 
   Widget buildButton() {
-    // return Container(
-    //   width: 40,
-    //   height: 40,
-    //   child: CircularProgressIndicator(
-    //     backgroundColor: Colors.white,
-    //     valueColor: AlwaysStoppedAnimation(Colors.red),
-    //   ),
-    // );
     return AnimatedBuilder(
       animation: animButtonControler,
       builder: (_, __) {
         return InkWell(
           onTap: _controller.isLoading.value ? () {} : () => doLogin(),
           child: Container(
-            width: widthButton.value,
+            width: buttonWidthAnim.value,
             height: 50,
             decoration: BoxDecoration(
               color: colorAnim.value,
@@ -205,7 +197,7 @@ class _LoginViewState extends State<LoginView> with TickerProviderStateMixin {
             alignment: Alignment.center,
             child: _controller.isLoading.value
                 ? Opacity(
-                    opacity: opacityAnim.value,
+                    opacity: buttonOpacityAnim.value,
                     child: Container(
                       width: 40,
                       height: 40,
@@ -216,7 +208,7 @@ class _LoginViewState extends State<LoginView> with TickerProviderStateMixin {
                     ),
                   )
                 : Opacity(
-                    opacity: 1 - opacityAnim.value,
+                    opacity: 1 - buttonOpacityAnim.value,
                     child: Text(
                       'Entrar',
                       style: TextStyle(
