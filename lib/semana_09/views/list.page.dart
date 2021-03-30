@@ -1,3 +1,4 @@
+import 'package:exemplos_flutter/semana_09/db/my_database.dart';
 import 'package:flutter/material.dart';
 
 class ListPage extends StatefulWidget {
@@ -38,6 +39,11 @@ class _ListPageState extends State<ListPage> {
       'url': 'https://robohash.org/5.png',
     }
   ];
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {

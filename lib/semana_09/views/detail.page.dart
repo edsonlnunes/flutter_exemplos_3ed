@@ -1,6 +1,9 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:exemplos_flutter/semana_09/db/my_database.dart';
+import 'package:exemplos_flutter/semana_09/models/user.model.dart';
+import 'package:exemplos_flutter/semana_09/repositories/user.repository.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:video_player/video_player.dart';
@@ -16,23 +19,17 @@ class DetailPage extends StatefulWidget {
 
 class _DetailPageState extends State<DetailPage> {
   final picker = ImagePicker();
-  File? imageFile;
-  VideoPlayerController? _controller;
   final cepController = TextEditingController();
-  String address = '';
+  final repository = UserRepository(new MyDatabase());
+  final user = User.empty();
 
+  File? imageFile;
   bool isLoadingCep = false;
 
   void changePhoto() async {
-    var pickedFile = await picker.getVideo(source: ImageSource.gallery);
+    var pickedFile = await picker.getImage(source: ImageSource.gallery);
     if (pickedFile != null) {
-      // setState(() => imageFile = File(pickedFile.path));
-      _controller = VideoPlayerController.file(File(pickedFile.path));
-
-      await _controller?.initialize();
-      setState(() {});
-      _controller!.setLooping(true);
-      _controller?.play();
+      setState(() => imageFile = File(pickedFile.path));
     }
   }
 
@@ -47,7 +44,8 @@ class _DetailPageState extends State<DetailPage> {
 
     setState(() {
       isLoadingCep = false;
-      address =
+      user.cep = cep;
+      user.address =
           '${resultAddress['logradouro']}, ${resultAddress['cep']} - ${resultAddress['bairro']}, ${resultAddress['localidade']} - ${resultAddress['uf']}';
     });
   }
@@ -66,27 +64,17 @@ class _DetailPageState extends State<DetailPage> {
               children: [
                 Stack(
                   children: [
-                    // if (imageFile == null)
-                    //   CircleAvatar(
-                    //     backgroundImage:
-                    //         NetworkImage('https://robohash.org/5.png'),
-                    //     radius: 100,
-                    //   ),
-                    // if (imageFile != null)
-                    //   CircleAvatar(
-                    //     backgroundImage: FileImage(imageFile!),
-                    //     radius: 100,
-                    //   ),
-                    CircleAvatar(
-                      radius: 100,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(100),
-                        child: _controller?.value != null &&
-                                _controller!.value.isInitialized
-                            ? VideoPlayer(_controller!)
-                            : Text('Sem vídeo'),
+                    if (imageFile == null)
+                      CircleAvatar(
+                        backgroundImage:
+                            NetworkImage('https://robohash.org/5.png'),
+                        radius: 100,
                       ),
-                    ),
+                    if (imageFile != null)
+                      CircleAvatar(
+                        backgroundImage: FileImage(imageFile!),
+                        radius: 100,
+                      ),
                     Positioned(
                       bottom: 30,
                       right: 20,
@@ -109,6 +97,7 @@ class _DetailPageState extends State<DetailPage> {
                     border: OutlineInputBorder(),
                     labelText: 'Nome',
                   ),
+                  onSaved: (value) => user.name = value!,
                 ),
                 SizedBox(
                   height: 20,
@@ -118,6 +107,7 @@ class _DetailPageState extends State<DetailPage> {
                     border: OutlineInputBorder(),
                     labelText: 'E-mail',
                   ),
+                  onSaved: (value) => user.name = value!,
                 ),
                 SizedBox(
                   height: 20,
@@ -165,12 +155,17 @@ class _DetailPageState extends State<DetailPage> {
                 ),
                 Align(
                   alignment: Alignment.centerLeft,
-                  child: Text(address),
+                  child: Text(user.address ?? ''),
                 ),
                 SizedBox(
                   height: 40,
                 ),
-                ElevatedButton(child: Text('Salvar'), onPressed: () {}),
+                ElevatedButton(
+                  child: Text('Salvar'),
+                  onPressed: () async {
+                    await repository.save(user);
+                  },
+                ),
               ],
             ),
           ),
