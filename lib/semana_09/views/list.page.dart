@@ -1,5 +1,10 @@
+import 'dart:io';
+
 import 'package:exemplos_flutter/semana_09/db/my_database.dart';
+import 'package:exemplos_flutter/semana_09/models/user.model.dart';
+import 'package:exemplos_flutter/semana_09/repositories/user.repository.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ListPage extends StatefulWidget {
   @override
@@ -7,42 +12,19 @@ class ListPage extends StatefulWidget {
 }
 
 class _ListPageState extends State<ListPage> {
-  final users = <Map<String, String>>[
-    {
-      'id': '1',
-      'nome': 'Edson',
-      'email': 'edson@gmail.com',
-      'url': 'https://robohash.org/1.png',
-    },
-    {
-      'id': '2',
-      'nome': 'Diego',
-      'email': 'diego@gmail.com',
-      'url': 'https://robohash.org/2.png',
-    },
-    {
-      'id': '3',
-      'nome': 'Gabriel',
-      'email': 'gabriel@gmail.com',
-      'url': 'https://robohash.org/3.png',
-    },
-    {
-      'id': '4',
-      'nome': 'Thobias',
-      'email': 'thobias@gmail.com',
-      'url': 'https://robohash.org/4.png',
-    },
-    {
-      'id': '5',
-      'nome': 'Airton',
-      'email': 'airton@gmail.com',
-      'url': 'https://robohash.org/5.png',
-    }
-  ];
+  final repository = UserRepository(MyDatabase());
+  Future<List<User>>? actionGetUsers;
 
   @override
   void initState() {
     super.initState();
+    _loadUsers();
+  }
+
+  void _loadUsers() async {
+    setState(() {
+      actionGetUsers = repository.get();
+    });
   }
 
   @override
@@ -74,64 +56,118 @@ class _ListPageState extends State<ListPage> {
                 ),
               ),
             ),
+            ListTile(
+              title: Text('Sair'),
+              onTap: () async {
+                final prefs = await SharedPreferences.getInstance();
+                prefs.remove('isLogged');
+                Navigator.pushReplacementNamed(context, '/');
+              },
+            )
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.of(context).pushNamed(
+        onPressed: () async {
+          final result = await Navigator.of(context).pushNamed(
             '/detail-page',
           );
+
+          if (result != null) {
+            _loadUsers();
+          }
         },
         child: Icon(Icons.add),
       ),
-      body: ListView.builder(
-        itemCount: users.length,
-        itemBuilder: (_, index) {
-          final user = users[index];
-          return Dismissible(
-            key: ValueKey(user['id']),
-            background: Container(
-              color: Colors.red,
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.delete,
-                    size: 40,
-                    color: Colors.white,
-                  ),
-                  SizedBox(
-                    width: 20,
-                  ),
-                  Text(
-                    'Excluindo...',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ],
-              ),
-            ),
-            direction: DismissDirection.startToEnd,
-            onDismissed: (direction) {
-              print('item foi removido');
+      body: FutureBuilder(
+        future: actionGetUsers,
+        builder: (_, AsyncSnapshot<List<User>> snapshot) {
+          if (snapshot.hasError) {
+            print(snapshot.error);
+            return Center(
+              child: Text('Ocorreu um erro ao carregar os usuários'),
+            );
+          }
+
+          if (snapshot.connectionState != ConnectionState.done) {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+
+          final users = snapshot.data ?? [];
+
+          return RefreshIndicator(
+            onRefresh: () async {
+              _loadUsers();
             },
-            confirmDismiss: (direction) async {
-              return true;
-            },
-            child: ListTile(
-              title: Text(user['nome']!),
-              subtitle: Text(user['email']!),
-              leading: CircleAvatar(
-                backgroundImage: NetworkImage(user['url']!),
-              ),
-              trailing: IconButton(
-                icon: Icon(Icons.edit),
-                onPressed: () {
-                  Navigator.of(context).pushNamed(
-                    '/detail-page',
-                    arguments: user,
-                  );
-                },
-              ),
+            child: ListView.builder(
+              itemCount: users.length,
+              itemBuilder: (_, index) {
+                final user = users[index];
+                return Dismissible(
+                  key: ValueKey(user.id),
+                  background: Container(
+                    color: Colors.red,
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.delete,
+                          size: 40,
+                          color: Colors.white,
+                        ),
+                        SizedBox(
+                          width: 20,
+                        ),
+                        Text(
+                          'Excluindo...',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ],
+                    ),
+                  ),
+                  direction: DismissDirection.startToEnd,
+                  onDismissed: (direction) {
+                    setState(() {
+                      users.removeWhere((u) => u.id == user.id);
+                    });
+                  },
+                  confirmDismiss: (direction) async {
+                    return await repository.delete(user);
+                  },
+                  child: ListTile(
+                    title: Text(user.name!),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(user.email ?? ''),
+                        Text(user.address!),
+                      ],
+                    ),
+                    isThreeLine: true,
+                    leading: user.pathImage == null
+                        ? CircleAvatar(
+                            backgroundImage:
+                                NetworkImage('https://robohash.org/1.png'),
+                          )
+                        : CircleAvatar(
+                            backgroundImage: FileImage(File(user.pathImage!)),
+                          ),
+                    trailing: IconButton(
+                      icon: Icon(Icons.edit),
+                      onPressed: () async {
+                        final result = await Navigator.of(context).pushNamed(
+                          '/detail-page',
+                          arguments: user,
+                        );
+                        if (result != null) {
+                          setState(() {});
+                        }
+                      },
+                    ),
+                  ),
+                );
+              },
             ),
           );
         },

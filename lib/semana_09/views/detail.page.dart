@@ -6,10 +6,9 @@ import 'package:exemplos_flutter/semana_09/models/user.model.dart';
 import 'package:exemplos_flutter/semana_09/repositories/user.repository.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:video_player/video_player.dart';
 
 class DetailPage extends StatefulWidget {
-  final Map<String, String>? user;
+  final User? user;
 
   DetailPage({this.user});
 
@@ -21,15 +20,24 @@ class _DetailPageState extends State<DetailPage> {
   final picker = ImagePicker();
   final cepController = TextEditingController();
   final repository = UserRepository(new MyDatabase());
-  final user = User.empty();
+  User? user = User.empty();
 
-  File? imageFile;
+  final _formKey = GlobalKey<FormState>();
+
   bool isLoadingCep = false;
+  @override
+  void initState() {
+    super.initState();
+    if (widget.user != null) {
+      user = widget.user;
+      cepController.text = widget.user!.cep!;
+    }
+  }
 
   void changePhoto() async {
     var pickedFile = await picker.getImage(source: ImageSource.gallery);
     if (pickedFile != null) {
-      setState(() => imageFile = File(pickedFile.path));
+      setState(() => user?.pathImage = pickedFile.path);
     }
   }
 
@@ -44,8 +52,8 @@ class _DetailPageState extends State<DetailPage> {
 
     setState(() {
       isLoadingCep = false;
-      user.cep = cep;
-      user.address =
+      user?.cep = cep;
+      user?.address =
           '${resultAddress['logradouro']}, ${resultAddress['cep']} - ${resultAddress['bairro']}, ${resultAddress['localidade']} - ${resultAddress['uf']}';
     });
   }
@@ -60,19 +68,20 @@ class _DetailPageState extends State<DetailPage> {
         child: Padding(
           padding: const EdgeInsets.all(10),
           child: Form(
+            key: _formKey,
             child: Column(
               children: [
                 Stack(
                   children: [
-                    if (imageFile == null)
+                    if (user?.pathImage == null)
                       CircleAvatar(
                         backgroundImage:
                             NetworkImage('https://robohash.org/5.png'),
                         radius: 100,
                       ),
-                    if (imageFile != null)
+                    if (user?.pathImage != null)
                       CircleAvatar(
-                        backgroundImage: FileImage(imageFile!),
+                        backgroundImage: FileImage(File(user!.pathImage!)),
                         radius: 100,
                       ),
                     Positioned(
@@ -93,21 +102,23 @@ class _DetailPageState extends State<DetailPage> {
                   height: 20,
                 ),
                 TextFormField(
+                  initialValue: user?.name,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(),
                     labelText: 'Nome',
                   ),
-                  onSaved: (value) => user.name = value!,
+                  onSaved: (value) => user?.name = value!,
                 ),
                 SizedBox(
                   height: 20,
                 ),
                 TextFormField(
+                  initialValue: user?.email,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(),
                     labelText: 'E-mail',
                   ),
-                  onSaved: (value) => user.name = value!,
+                  onSaved: (value) => user?.email = value!,
                 ),
                 SizedBox(
                   height: 20,
@@ -155,7 +166,7 @@ class _DetailPageState extends State<DetailPage> {
                 ),
                 Align(
                   alignment: Alignment.centerLeft,
-                  child: Text(user.address ?? ''),
+                  child: Text(user?.address ?? ''),
                 ),
                 SizedBox(
                   height: 40,
@@ -163,7 +174,17 @@ class _DetailPageState extends State<DetailPage> {
                 ElevatedButton(
                   child: Text('Salvar'),
                   onPressed: () async {
-                    await repository.save(user);
+                    if (!_formKey.currentState!.validate()) return;
+
+                    _formKey.currentState!.save();
+
+                    print(user);
+
+                    user?.id == null
+                        ? await repository.save(user!)
+                        : await repository.update(user!);
+
+                    Navigator.pop(context, user);
                   },
                 ),
               ],

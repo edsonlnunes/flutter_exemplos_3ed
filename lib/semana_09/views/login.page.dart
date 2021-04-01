@@ -23,13 +23,13 @@ class _LoginPageState extends State<LoginPage> {
   String? email;
   String? pass;
 
-  void doLogin(ctx) {
+  void doLogin(ctx) async {
     // if (!Form.of(ctx)!.validate()) return;
     if (!formKey.currentState!.validate()) return;
 
     formKey.currentState?.save();
 
-    final isLogged = Service().doLogin(email: email!, pass: pass!);
+    final isLogged = await Service().doLogin(email: email!, pass: pass!);
 
     if (!isLogged) {
       showFailureLogin();

@@ -21,11 +21,11 @@ class User {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
       'name': name,
       'email': email,
       'cep': cep,
-      'adress': address,
+      'address': address,
+      'file_path': pathImage,
     };
   }
 
@@ -36,11 +36,16 @@ class User {
       email: map['email'],
       cep: map['cep'],
       address: map['address'],
-      pathImage: map['pathImage'],
+      pathImage: map['file_path'],
     );
   }
 
   String toJson() => json.encode(toMap());
 
   factory User.fromJson(String source) => User.fromMap(json.decode(source));
+
+  @override
+  String toString() {
+    return 'User(id: $id, name: $name, email: $email, cep: $cep, address: $address, pathImage: $pathImage)';
+  }
 }

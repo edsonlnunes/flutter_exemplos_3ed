@@ -29,35 +29,35 @@ class MyDatabase {
       onCreate: (db, version) async {
         print('versão $version');
 
-        // await db.execute('''
-        //   CREATE TABLE users(
-        //     id INTEGER PRIMARY KEY AUTOINCREMENT,
-        //     name TEXT,
-        //     email TEXT,
-        //     cep TEXT,
-        //     adress TEXT,
-        //     file_path TEXT
-        //   );
-        // ''');
-
         await db.execute('''
           CREATE TABLE users(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT,
             email TEXT,
+            cep TEXT,
+            address TEXT,
             file_path TEXT
           );
         ''');
 
-        await db.execute('''
-          CREATE TABLE address(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            cep TEXT,
-            address TEXT,
-            userid INTEGER NOT NULL,
-            FOREIGN KEY(userid) REFERENCES users(id)
-          );
-        ''');
+        // await db.execute('''
+        //   CREATE TABLE users(
+        //     id INTEGER PRIMARY KEY AUTOINCREMENT,
+        //     name TEXT,
+        //     email TEXT,
+        //     file_path TEXT
+        //   );
+        // ''');
+
+        // await db.execute('''
+        //   CREATE TABLE address(
+        //     id INTEGER PRIMARY KEY AUTOINCREMENT,
+        //     cep TEXT,
+        //     address TEXT,
+        //     userid INTEGER NOT NULL,
+        //     FOREIGN KEY(userid) REFERENCES users(id)
+        //   );
+        // ''');
       },
       onUpgrade: (db, oldVersion, newVersion) {
         print('oldVersion: $oldVersion');
