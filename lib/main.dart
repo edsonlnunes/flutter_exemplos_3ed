@@ -1,8 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import 'semana_09/main.dart';
+import 'semana_10/main.dart';
 
 void main() {
-  runApp(MyAppSegunda09());
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(MyAppSemana10());
 }
