@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:flutter_signin_button/button_list.dart';
 import 'package:flutter_signin_button/button_view.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -31,6 +32,21 @@ class _LoginPageState extends State<LoginPage> {
 
     print(loginResult.user!.displayName);
     print(loginResult.user!.email);
+  }
+
+  Future<void> doLoginFacebook() async {
+    final result = await FacebookAuth.instance.login();
+
+    if (result.status == LoginStatus.success) {
+      final credential =
+          FacebookAuthProvider.credential(result.accessToken!.token);
+
+      final firebaseResult =
+          await FirebaseAuth.instance.signInWithCredential(credential);
+
+      print(firebaseResult.user?.displayName);
+      print(firebaseResult.user?.email);
+    }
   }
 
   void showFailureLogin() async {
@@ -86,7 +102,7 @@ class _LoginPageState extends State<LoginPage> {
                   height: 50,
                   child: SignInButton(
                     Buttons.FacebookNew,
-                    onPressed: () {},
+                    onPressed: doLoginFacebook,
                   ),
                 ),
               ],
