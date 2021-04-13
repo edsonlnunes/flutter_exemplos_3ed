@@ -80,6 +80,7 @@ class _CounterPageState extends State<CounterPage> {
             ValueListenableBuilder<int>(
               valueListenable: controller.counter,
               builder: (_, counter, __) {
+                print('passou aqui');
                 return Text(
                   counter.toString(),
                   style: Theme.of(context).textTheme.headline4,
