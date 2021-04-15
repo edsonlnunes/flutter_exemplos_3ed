@@ -8,27 +8,35 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'auth.controller.dart';
 
 class LoginController {
-  ValueNotifier<bool> isLoading = ValueNotifier(true);
+  ValueNotifier<bool> isLoading = ValueNotifier(false);
 
-  Future<bool> doLoginGoogle() async {
-    final googleUser = await GoogleSignIn().signIn();
+  void toggleLoading() => isLoading.value = !isLoading.value;
 
-    final googleAuth = await googleUser!.authentication;
+  Future<void> doLoginGoogle() async {
+    toggleLoading();
 
-    final credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
-    );
+    try {
+      final googleUser = await GoogleSignIn().signIn();
 
-    final loginResult =
-        await FirebaseAuth.instance.signInWithCredential(credential);
+      final googleAuth = await googleUser!.authentication;
 
-    await setUserLogged(loginResult.user);
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
 
-    return true;
+      final loginResult =
+          await FirebaseAuth.instance.signInWithCredential(credential);
+
+      await setUserLogged(loginResult.user);
+    } catch (e) {
+      toggleLoading();
+    }
   }
 
-  Future<bool> doLoginFacebook() async {
+  Future<void> doLoginFacebook() async {
+    toggleLoading();
+
     final result = await FacebookAuth.instance.login();
 
     if (result.status == LoginStatus.success) {
@@ -39,11 +47,9 @@ class LoginController {
           await FirebaseAuth.instance.signInWithCredential(credential);
 
       await setUserLogged(firebaseResult.user);
-
-      return true;
     }
 
-    return false;
+    toggleLoading();
   }
 
   Future<void> setUserLogged(User? firebaseUser) async {
@@ -57,6 +63,8 @@ class LoginController {
     );
 
     final authController = GetIt.I.get<AuthController>();
+
     authController.userLogged = userAuth;
+    toggleLoading();
   }
 }

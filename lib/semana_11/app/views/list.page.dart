@@ -71,9 +71,7 @@ class _ListPageState extends State<ListPage> {
             ListTile(
               title: Text('Sair'),
               onTap: () async {
-                final prefs = await SharedPreferences.getInstance();
-                prefs.remove('isLogged');
-                Navigator.pushReplacementNamed(context, '/');
+                await authController.logout();
               },
             )
           ],

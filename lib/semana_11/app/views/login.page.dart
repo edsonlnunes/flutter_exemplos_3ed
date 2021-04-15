@@ -1,9 +1,6 @@
-import 'package:exemplos_flutter/semana_11/app/controllers/auth.controller.dart';
-import 'package:exemplos_flutter/semana_11/app/models/user_auth.model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_signin_button/button_list.dart';
 import 'package:flutter_signin_button/button_view.dart';
-import 'package:provider/provider.dart';
 
 import '../controllers/login.controller.dart';
 
@@ -31,14 +28,6 @@ class _LoginPageState extends State<LoginPage> {
         );
       },
     );
-  }
-
-  Future<void> doLogin(Future<bool> Function() onLogin) async {
-    final isLogged = await onLogin();
-
-    if (!isLogged) return;
-
-    Navigator.of(context).pushReplacementNamed('/list-page');
   }
 
   @override
@@ -69,17 +58,49 @@ class _LoginPageState extends State<LoginPage> {
                   height: 50,
                   child: SignInButton(
                     Buttons.GoogleDark,
-                    onPressed: () => doLogin(loginController.doLoginGoogle),
+                    onPressed: loginController.doLoginGoogle,
                   ),
                 ),
-                SizedBox(
-                  height: 20,
+                ValueListenableBuilder<bool>(
+                  valueListenable: loginController.isLoading,
+                  builder: (_, isLoading, __) {
+                    return AnimatedContainer(
+                      height: isLoading ? 150 : 65,
+                      duration: Duration(milliseconds: 500),
+                      child: isLoading
+                          ? Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                CircularProgressIndicator(
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white),
+                                  strokeWidth: 5,
+                                ),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                Flexible(
+                                  child: Text(
+                                    'Autenticando...',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .headline6
+                                        ?.copyWith(
+                                          color: Colors.white,
+                                        ),
+                                  ),
+                                )
+                              ],
+                            )
+                          : null,
+                    );
+                  },
                 ),
                 Container(
                   height: 50,
                   child: SignInButton(
                     Buttons.FacebookNew,
-                    onPressed: () => doLogin(loginController.doLoginFacebook),
+                    onPressed: loginController.doLoginFacebook,
                   ),
                 ),
               ],
