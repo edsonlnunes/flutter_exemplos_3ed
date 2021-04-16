@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import 'counter.controller.dart';
+import 'counter_notifier.controller.dart';
 
-class CounterApp extends StatelessWidget {
+class CounterNotifierApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -12,17 +12,17 @@ class CounterApp extends StatelessWidget {
         primarySwatch: Colors.teal,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: CounterPage(),
+      home: CounterNotifier(),
     );
   }
 }
 
-class CounterPage extends StatefulWidget {
+class CounterNotifier extends StatefulWidget {
   @override
-  _CounterPageState createState() => _CounterPageState();
+  _CounterNotifierState createState() => _CounterNotifierState();
 }
 
-class _CounterPageState extends State<CounterPage> {
+class _CounterNotifierState extends State<CounterNotifier> {
   final controller = CounterController();
 
   @override
